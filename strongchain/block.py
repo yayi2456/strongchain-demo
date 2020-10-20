@@ -11,6 +11,9 @@ from .header import Header
 class Block():
 
     def __init__(self, node, header, length, txns = [], whdrs = []):
+        '''
+        Constructor of Block
+        '''
         self.header = header
 
         self.length = length
@@ -20,16 +23,25 @@ class Block():
 
 
     def generate_root_hash(self, items):
+        '''
+        Return merkle root of merkle tree whose leaves(bottom hash) are items.
+        '''
         tree = MerkleTree(items)
         return tree.get_root()
 
 
     def PoW(self):
+        '''
+        return PoW of this block
+        '''
         return Header.MAX_TARGET / self.header.target + (Header.MAX_TARGET / self.header.weak_target) * len(self.weak_hdrs)
 
 
     def get_ts(self):
-        "Considers all weak headers' timestamps."
+        '''
+        Return timestamp of this block.
+        Considers all weak headers' timestamps.
+        '''
         sum_ts = self.header.timestamp
         sum_weight = 1
         ratio_wh = self.header.target / self.header.weak_target
@@ -62,10 +74,18 @@ class Block():
 
 
     def __str__(self):
+        '''
+        Return a json-string of all fields of Block
+        '''
         return self.to_json_str()
 
 
     def to_short_str(self):
+        '''
+        Return short str of Block
+        '''
+        # python format of numbers: https://www.runoob.com/python/att-string-format.html
+        #:>3d: 右对齐，默认宽度是3
         return "[{:>3d}] | H = {}, CB = {}, WHs = {:>2d}, TXNs = {:>2d}, target_s = {}, target_w = {}, PoW = {:>7.1f}|".format(
             self.length, self.header.hash[:16], self.header.coinbase[:16], len(self.weak_hdrs), len(self.txns),
             "{:064x}".format(self.header.target)[:16], "{:064x}".format(self.header.weak_target)[:16],  self.PoW()
@@ -73,6 +93,9 @@ class Block():
 
 
     def to_json(self):
+        '''
+        Return a dictionary of all fields of Block
+        '''
         if not self.header.root:
             self.header.root = self.generate_root_hash(self.txns)
         if not self.header.whdrs_hash:
@@ -87,17 +110,26 @@ class Block():
 
 
     def to_json_str(self):
+        '''
+        Return a json-string of all fields of Block
+        '''
         return json.dumps(self.to_json(), indent=4)
 
 
     @classmethod
     def from_json_str(cls, node, json_string):
+        '''
+        Return python type Block from json_string
+        '''
         j = json.loads(json_string)
         return Block.from_json(node, j)
 
 
     @classmethod
     def from_json(cls, node, j):
+        '''
+        Return python type Block from json_string
+        '''
         return cls(node,  Header.from_json(j.get("header")), j.get("length"),
             [ Transaction.from_json(tx) for tx in j.get("txns")],
             [ Header.from_json(wh) for wh in j.get("weak_hdrs")]

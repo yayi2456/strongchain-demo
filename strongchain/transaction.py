@@ -5,6 +5,9 @@ import hashlib
 class Transaction:
 
     def __init__(self, sender_pk, receiver_pk, amount, signature, comment=''):
+        '''
+        Constructor of Transaction
+        '''
         self.sender = sender_pk
         self.receiver = receiver_pk
         self.amount = amount
@@ -13,6 +16,9 @@ class Transaction:
 
 
     def to_json(self):
+        '''
+        Return a dictionary of Transaction fields
+        '''
         return {
             'sender': self.sender,
             'receiver': self.receiver,
@@ -23,14 +29,23 @@ class Transaction:
 
 
     def to_json_str(self):
+        '''
+        Return a json-str of self.
+        '''
         return json.dumps(self.to_json(), indent = 4)
 
 
     def __str__(self):
+        '''
+        Return a json-str of self.
+        '''
         return self.to_json_str()
 
     @property
-    def hash(self):
+    def hash(self):# property is called as a property rather than a function. self.hash return the result of this function.
+        '''
+        Return hash of the transaction.
+        '''
         to_hash = {'sender': self.sender,
                      'receiver': self.receiver,
                      'amount': self.amount,
@@ -40,6 +55,9 @@ class Transaction:
 
 
     def validate_sig(self):
+        '''
+        Return True if the signature of this transaction is valid.
+        '''
         local_msg = self.hash
         msg_byte = str(local_msg).encode('utf-8')
 
@@ -54,6 +72,9 @@ class Transaction:
 
 
     def __eq__(self, other):
+        '''
+        Return True if each filed of self and other are the same.
+        '''
         return self.amount == int(other.amount) and \
                self.sender == other.sender and \
                self.receiver == other.receiver and \
@@ -63,10 +84,16 @@ class Transaction:
 
     @classmethod
     def from_json(cls, j):
+        '''
+        Return the python type Transaction from dictionary j.
+        '''
         return cls(j.get("sender"), j.get("receiver"), float(j.get("amount")), j.get("signature"), j.get("comment"))
 
 
     @classmethod
     def from_json_str(cls, json_string):
+        '''
+        Return the python type Transaction from json-string json_string.
+        '''
         j = json.loads(json_string)
         return Transaction.from_json(j)
